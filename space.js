@@ -18,6 +18,10 @@ let gameDisplay = (function() {
             ctx.fillRect(rect.x,rect.y,rect.width,rect.height);
         },
 
+        undraw: function(rect) {
+            ctx.clearRect(rect.x,rect.y,rect.width,rect.height);
+        },
+
         constructor: function(lines) {
             for (let i=0;i < lines;i++) {
             for (let j=0; j < (window.innerWidth / 100); j++) {
@@ -37,10 +41,13 @@ let gameDisplay = (function() {
 let gameLogic = (function() {
 
     return {
-        movement: function(array,fn) {
+        movement: function(array,undrawfn,drawfn) {
             array.forEach(function(obj) {
+                if (obj.id < (array.length)/4) {
+                    undrawfn(obj);
+                };
                 obj.y+=50;
-                fn(obj);
+                drawfn(obj);
             });
         }, 
         
@@ -54,7 +61,7 @@ let masterController = (function(gDisplay,gLogic) {
         console.log(gDisplay.eID);
     };
     start();
-    setInterval(function() {gLogic.movement(gDisplay.eID,gDisplay.draw)},1000);
+    setInterval(function() {gLogic.movement(gDisplay.eID,gDisplay.undraw,gDisplay.draw)},1000);
     
 
 })(gameDisplay,gameLogic);
