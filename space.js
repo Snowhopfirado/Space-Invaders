@@ -33,19 +33,16 @@ let gameDisplay = (function() {
         },
         
         eID: enemies,
-        num: 4
+        num: 4,
     };
 
-
 })();
-let yes = false;
 
 let gameLogic = (function() {
-    
     return {
-        mLeft: true,
+        mLeft: false,
         mRight: false,
-        mDown: false,
+        mDown: true,
         
         moveLeft: function(array,undrawfn,drawfn,left,right,down) {
             array.forEach(function(obj) {
@@ -85,20 +82,19 @@ let gameLogic = (function() {
         },
         moveDown: function(array,undrawfn,drawfn,down) {
             array.forEach(function(obj) {
-                if (obj.y >= 600) {
+                if (obj.y >= 660) {
                     down = false;
                 }
             });
             array.forEach(function(obj) {
                 if (down === true) {
                     undrawfn(obj);
-                    obj.y+=45;
+                    obj.y+=30;
                     drawfn(obj);
             }
             });
             down = false;
         },
-        
     }     
 })();
 
@@ -111,5 +107,5 @@ let masterController = (function(gDisplay,gLogic) {
     start();
     setInterval(function() {gLogic.moveLeft(gDisplay.eID,gDisplay.undraw,gDisplay.draw,gLogic.mLeft,gLogic.mRight,gLogic.mDown)},500);
     setInterval(function() {gLogic.moveRight(gDisplay.eID,gDisplay.undraw,gDisplay.draw,gLogic.mLeft,gLogic.mRight,gLogic.mDown)},500);
-    setInterval(function() {gLogic.moveDown(gDisplay.eID,gDisplay.undraw,gDisplay.draw,gLogic.mDown)},500);
+    setInterval(function() {gLogic.moveDown(gDisplay.eID,gDisplay.undraw,gDisplay.draw,gLogic.mDown)},250);
 })(gameDisplay,gameLogic); 
