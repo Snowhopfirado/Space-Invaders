@@ -37,12 +37,13 @@ let gameDisplay = (function() {
     };
 
 })();
-
+let sum = [0];
 let gameLogic = (function() {
     return {
         mLeft: false,
         mRight: false,
         mDown: true,
+        nSum: sum,
         
         moveLeft: function(array,undrawfn,drawfn,left,right,down) {
             array.forEach(function(obj) {
@@ -95,6 +96,12 @@ let gameLogic = (function() {
             });
             down = false;
         },
+        temp: function(test) {
+            for (let i=0;i < 6;i++) {
+                test.push[i];
+            }
+            console.log(test);
+        }
     }     
 })();
 
@@ -108,4 +115,5 @@ let masterController = (function(gDisplay,gLogic) {
     setInterval(function() {gLogic.moveLeft(gDisplay.eID,gDisplay.undraw,gDisplay.draw,gLogic.mLeft,gLogic.mRight,gLogic.mDown)},500);
     setInterval(function() {gLogic.moveRight(gDisplay.eID,gDisplay.undraw,gDisplay.draw,gLogic.mLeft,gLogic.mRight,gLogic.mDown)},500);
     setInterval(function() {gLogic.moveDown(gDisplay.eID,gDisplay.undraw,gDisplay.draw,gLogic.mDown)},250);
+    window.addEventListener('click',function() {gLogic.temp(gLogic.nSum)});
 })(gameDisplay,gameLogic); 
