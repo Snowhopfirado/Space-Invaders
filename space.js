@@ -4,31 +4,45 @@ let gameDisplay = (function() {
     canvas.width=1200;
     canvas.height=window.innerHeight;
 
-    let Rectangle = function(x,y,width,height,id) {
+    let Rectangle = function(color,x,y,width,height,id) {
+        this.color = color;
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
         this.id = id;
     };
+    let playerRect = {
+        color:"purple",
+        x:580,
+        y:670,
+        width:40,
+        height:40,
+        x_left: 0,
+        x_right: 0
+    };
     enemies = [];
     return {
+        pRect:playerRect,
         draw: function(rect) {
-            ctx.fillStyle = "blue";
+            ctx.fillStyle = rect.color;
             ctx.fillRect(rect.x,rect.y,rect.width,rect.height);
         },
-
+       
         undraw: function(rect) {
             ctx.clearRect(rect.x,rect.y,rect.width,rect.height);
         },
 
-        constructor: function(lines) {
+        constructor: function(lines,pdraw,player) {
             for (let i=0;i < lines;i++) {
                 for (let j=1; j < 15; j++) {
-                    let newRect = new Rectangle((j*72)+50,(i*50)+30,20,20,enemies.length)
+                    let newRect = new Rectangle("blue",(j*72)+50,(i*50)+30,20,20,enemies.length)
                     this.draw(newRect);
                     enemies.push(newRect);
             }
+        let ground = new Rectangle("green",0,710,1200,window.innerHeight);
+        this.draw(ground);
+        pdraw(player);
         };
         },
         
@@ -37,83 +51,133 @@ let gameDisplay = (function() {
     };
 
 })();
-let sum = [0];
+
 let gameLogic = (function() {
     return {
-        mLeft: false,
-        mRight: false,
-        mDown: true,
-        nSum: sum,
         
-        moveLeft: function(array,undrawfn,drawfn,left,right,down) {
+        checkMove: {
+            left: true,
+            right: false,
+            down: false,
+            temp: true
+        },
+        
+        moveLeft: function(array,undrawfn,drawfn,move) {
             array.forEach(function(obj) {
                 if (obj.x <= 35) {
-                    left = false;
-                    right = true;
+                    move.down = true;
+                    move.left = false;
                 }
             })
             array.forEach(function(obj) {
-                if (left === true) {
+                if (move.left === true) {
                     undrawfn(obj);
                     obj.x-=30;
                     drawfn(obj);
-                } else if (left === false) {
-                    down = true;
+                } else if (move.left === false) {
+                    move.right = true;
                 };
             });
         },
         
 
-        moveRight: function(array, undrawfn, drawfn, left,right,down) {
+        moveRight: function(array, undrawfn, drawfn,move) {
             array.forEach(function(obj) {
                 if (obj.x >= 1140) {
-                    right = false;
+                    move.down = true;
+                    move.right = false;
                 } 
             });
             array.forEach(function(obj) {
-                if (right === true) {
+                if (move.right === true) {
                     undrawfn(obj);
                     obj.x += 30;
                     drawfn(obj);
-                } else if (right === false) {
-                    down = true;
-                    left = true;
+                } else if (move.right === false) {
+                    move.left = true;
                 };
             });
         },
-        moveDown: function(array,undrawfn,drawfn,down) {
+        moveDown: function(array,undrawfn,drawfn,move) {
             array.forEach(function(obj) {
-                if (obj.y >= 660) {
-                    down = false;
+                if (obj.y >= 690) {
+                    move.down = false;
                 }
             });
             array.forEach(function(obj) {
-                if (down === true) {
+                if (move.down === true) {
                     undrawfn(obj);
                     obj.y+=30;
                     drawfn(obj);
             }
             });
-            down = false;
+            move.down = false;
+            
+            
         },
-        temp: function(test) {
-            for (let i=0;i < 6;i++) {
-                test.push[i];
-            }
-            console.log(test);
+        eMovement: function(fnLeft,fnRight,array,undrawfn,drawfn,move) {
+            if (move.left === true && move.temp === true) {
+                fnLeft(array,undrawfn,drawfn,move);
+            } else if (move.right === true && move.temp === true) {
+                fnRight(array,undrawfn,drawfn,move);
+            };
+                
+        },
+        eMovementDown: function(fnDown,array,undrawfn,drawfn,move) {
+            if (move.temp === true) {fnDown(array,undrawfn,drawfn,move);}
+        },
+        tempStop: function(move) {
+            switch(move.temp) {
+                case true:
+                move.temp = false;
+                break;
+
+                case false:
+                move.temp = true;
+                
+            };
+        },
+        playerMove: function(undrawfn,drawfn,player) {
+            if (player.x_left === 1 && player.x > 0) {
+            undrawfn(player);
+            player.x-=(player.x_left * 10);
+            drawfn(player);
+        } else if (player.x_right === 1 && player.x < 1200 && player.x < 1160) {
+            undrawfn(player)
+            player.x+=(player.x_right * 10);
+            drawfn(player);
         }
+    }
     }     
 })();
 
 
 let masterController = (function(gDisplay,gLogic) {
     let start = function() {
-        gDisplay.constructor(gDisplay.num);
+        gDisplay.constructor(gDisplay.num,gDisplay.draw,gDisplay.pRect);
         console.log(gDisplay.eID);
     };
     start();
-    setInterval(function() {gLogic.moveLeft(gDisplay.eID,gDisplay.undraw,gDisplay.draw,gLogic.mLeft,gLogic.mRight,gLogic.mDown)},500);
-    setInterval(function() {gLogic.moveRight(gDisplay.eID,gDisplay.undraw,gDisplay.draw,gLogic.mLeft,gLogic.mRight,gLogic.mDown)},500);
-    setInterval(function() {gLogic.moveDown(gDisplay.eID,gDisplay.undraw,gDisplay.draw,gLogic.mDown)},250);
-    window.addEventListener('click',function() {gLogic.temp(gLogic.nSum)});
-})(gameDisplay,gameLogic); 
+    setInterval(function() {gLogic.eMovement(gLogic.moveLeft,gLogic.moveRight,gDisplay.eID,gDisplay.undraw,gDisplay.draw,gLogic.checkMove)},500);
+    setInterval(function() {gLogic.eMovementDown(gLogic.moveDown,gDisplay.eID,gDisplay.undraw,gDisplay.draw,gLogic.checkMove)},500);
+    window.addEventListener('click',function() {gLogic.tempStop(gLogic.checkMove)});
+    setInterval(function() {gLogic.playerMove(gDisplay.undraw,gDisplay.draw,gDisplay.pRect)},16.67);
+    window.onkeydown = function(event) {
+        if (event.keyCode === 37) {
+            gDisplay.pRect.x_left = 1;
+        } else if (event.keyCode === 39) {
+            gDisplay.pRect.x_right = 1;
+        };
+    };
+    window.onkeyup = function(event) {
+        switch(event.keyCode) {
+            case 37:
+            gDisplay.pRect.x_left = 0;
+            break;
+
+            case 39:
+            gDisplay.pRect.x_right = 0;
+            break;
+        }
+    };
+})(gameDisplay,gameLogic);
